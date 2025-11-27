@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>동치 분수 AI 코치</title>
+<style>
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #FFEEC4;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+header {
+  background-color: #A8DADC;
+  text-align: center;
+  padding: 20px;
+  border-bottom: 4px solid #F4A261;
+}
+header h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0;
+}
+main {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px;
+}
+section {
+  flex: 2;
+  margin-right: 20px;
+}
+aside {
+  flex: 1;
+  background-color: #E9F5F2;
+  border-radius: 10px;
+  padding: 15px;
+}
+button {
+  background-color: #A8DADC;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  margin: 5px;
+}
+button:hover {
+  background-color: #F4A261;
+  color: white;
+}
+#visual-panel {
+  background-color: #FFF;
+  border-radius: 10px;
+  border: 2px solid #A8DADC;
+  height: 250px;
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#dashboard {
+  text-align: center;
+}
+#dashboard h3 {
+  margin-top: 0;
+}
+input[type="number"] {
+  width: 60px;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+#feedback {
+  margin-top: 10px;
+  font-weight: bold;
+}
+.start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #A8DADC;
+  color: white;
+}
+.start-screen button {
+  background-color: #FFEEC4;
+  color: #333;
+  font-size: 1.2em;
+}
+.hidden {
+  display: none;
+}
+</style>
+</head>
+<body>
+<div class="start-screen" id="startScreen">
+  <h1>동치 분수 AI 코치</h1>
+  <p>분수의 세계로 함께 떠나볼까요?</p>
+  <button onclick="startApp()">시작하기</button>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>동치 분수 AI 코치</h1>
+  </header>
+  <main>
+    <section>
+      <div id="problem-area">
+        <h2 id="problem-text">문제를 생성해보세요!</h2>
+        <button onclick="generateProblem()">문제 생성</button>
+        <div id="input-area">
+          <label>분자: <input type="number" id="numerator"></label>
+          <label>분모: <input type="number" id="denominator"></label>
+          <button onclick="checkAnswer()">정답 확인</button>
+        </div>
+        <div id="feedback"></div>
+        <div id="visual-panel">분수 시각화 영역</div>
+      </div>
+    </section>
+    <aside id="dashboard">
+      <h3>진행 상황</h3>
+      <p>학습 시간: <span id="time">0</span>분</p>
+      <p>해결 문제 수: <span id="solved">0</span></p>
+      <p>획득 배지: <span id="badges">없음</span></p>
+    </aside>
+  </main>
+</div>
+
+<script>
+let solvedCount = 0;
+let startTime;
+let currentProblem = {};
+
+function startApp() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  startTime = new Date();
+  setInterval(updateTime, 60000);
+}
+
+function updateTime() {
+  const now = new Date();
+  const diff = Math.floor((now - startTime) / 60000);
+  document.getElementById('time').textContent = diff;
+}
+
+function generateProblem() {
+  const numerator = Math.floor(Math.random() * 5) + 1;
+  const denominator = numerator * (Math.floor(Math.random() * 3) + 2);
+  currentProblem = { numerator, denominator };
+  document.getElementById('problem-text').textContent = 
+    `${numerator}/${denominator}와 동치인 분수를 찾아보세요!`;
+  document.getElementById('feedback').textContent = '';
+}
+
+function checkAnswer() {
+  const num = parseInt(document.getElementById('numerator').value);
+  const den = parseInt(document.getElementById('denominator').value);
+  if (!num || !den) {
+    document.getElementById('feedback').textContent = '분자와 분모를 모두 입력하세요.';
+    return;
+  }
+  const correct = currentProblem.numerator / currentProblem.denominator;
+  const user = num / den;
+  if (Math.abs(correct - user) < 0.0001) {
+    solvedCount++;
+    document.getElementById('solved').textContent = solvedCount;
+    document.getElementById('feedback').textContent = '정답입니다! 🎉';
+    document.getElementById('feedback').style.color = '#F4A261';
+  } else {
+    document.getElementById('feedback').textContent = '오답입니다. 힌트를 확인해보세요!';
+    document.getElementById('feedback').style.color = 'red';
+  }
+}
+</script>
+</body>
+</html>
