@@ -1,7 +1,242 @@
 # ChrisPOLO-ai.github.io
-<html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jiyong's Workspace</title>
+    
+    <!-- 아이콘 및 폰트 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
 
-  <h1>지용의 웹페이지</h1>
-  <a href="deeplearning.html">딥러닝게임</a>
-  <a href="sittingarrangement.html">자리배치프로그램</a>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 배경 요소 스크롤 방지 */
+            background-color: #0f172a;
+        }
+
+        /* === 배경 애니메이션 (Liquid Background) === */
+        .liquid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.8;
+            animation: move 20s infinite alternate;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation-duration: 25s;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: linear-gradient(135deg, #db2777, #f43f5e);
+            border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+            animation-duration: 30s;
+            animation-direction: alternate-reverse;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 40%;
+            width: 40vw;
+            height: 40vw;
+            background: linear-gradient(135deg, #059669, #0891b2);
+            border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+            animation: moveRotate 40s infinite linear;
+            opacity: 0.6;
+        }
+
+        @keyframes move {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        @keyframes moveRotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* === 글래스모피즘 카드 (Glassmorphism) === */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 버튼 호버 시 빛나는 효과 (Shine Effect) */
+        .glass-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .glass-button:hover::before {
+            left: 100%;
+        }
+
+        .glass-button:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 텍스트 그라데이션 */
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- 움직이는 배경 -->
+    <div class="liquid-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <main class="relative z-10 w-full max-w-lg p-6 mx-4 text-center">
+        
+        <!-- 프로필 섹션 -->
+        <div class="glass-card rounded-3xl p-8 mb-8 fade-in-up">
+            <div class="w-24 h-24 mx-auto mb-4 rounded-full glass-button flex items-center justify-center border-2 border-white/30 shadow-lg">
+                <i class="fas fa-user-astronaut text-4xl text-white/90"></i>
+            </div>
+            
+            <h1 class="text-4xl font-black mb-2 tracking-tight text-white drop-shadow-lg">
+                지용의 웹페이지
+            </h1>
+            <p class="text-white/70 font-light text-sm mb-6">
+                Creative Developer & AI Enthusiast
+            </p>
+
+            <div class="w-16 h-1 bg-white/30 mx-auto rounded-full"></div>
+        </div>
+
+        <!-- 링크 버튼 섹션 -->
+        <div class="grid gap-4">
+            
+            <!-- 딥러닝 게임 링크 -->
+            <a href="deeplearning.html" class="glass-button rounded-2xl p-4 group flex items-center gap-4 text-left group no-underline">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/30 flex items-center justify-center text-white group-hover:bg-purple-500/50 transition-colors">
+                    <i class="fas fa-brain text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white group-hover:text-purple-200 transition-colors">딥러닝 게임</h3>
+                    <p class="text-xs text-gray-300 font-light">AI 모델을 활용한 인터랙티브 게임</p>
+                </div>
+                <div class="text-white/50 group-hover:translate-x-1 transition-transform">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <!-- 자리 배치 프로그램 링크 -->
+            <a href="sittingarrangement.html" class="glass-button rounded-2xl p-4 group flex items-center gap-4 text-left group no-underline">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/30 flex items-center justify-center text-white group-hover:bg-blue-500/50 transition-colors">
+                    <i class="fas fa-th text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white group-hover:text-blue-200 transition-colors">자리 배치 프로그램</h3>
+                    <p class="text-xs text-gray-300 font-light">편리한 학급 관리 도구</p>
+                </div>
+                <div class="text-white/50 group-hover:translate-x-1 transition-transform">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- 푸터 -->
+        <footer class="mt-12 text-white/40 text-xs font-light">
+            <p>© 2024 ChrisPOLO-ai. All rights reserved.</p>
+            <div class="flex justify-center gap-4 mt-2">
+                <a href="#" class="hover:text-white transition-colors"><i class="fab fa-github"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fas fa-envelope"></i></a>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        // 간단한 등장 애니메이션
+        document.addEventListener("DOMContentLoaded", () => {
+            const card = document.querySelector('.glass-card');
+            const buttons = document.querySelectorAll('.glass-button');
+            
+            // 카드 등장
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.8s ease-out';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+
+            // 버튼 순차 등장
+            buttons.forEach((btn, index) => {
+                btn.style.opacity = '0';
+                btn.style.transform = 'translateY(20px)';
+                btn.style.transition = `all 0.5s ease-out ${0.4 + (index * 0.1)}s`;
+                
+                setTimeout(() => {
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'translateY(0)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
 </html>
