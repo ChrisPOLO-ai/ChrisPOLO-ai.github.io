@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 학급 자리 배치</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-user-select: none; /* 드래그 시 텍스트 선택 방지 */
+            user-select: none;
+        }
+
+        /* 커스텀 스크롤바 */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* 책상 스타일 */
+        .desk {
+            width: 80px;
+            height: 60px;
+            position: absolute;
+            background-color: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+            z-index: 10;
+        }
+        
+        .desk:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+            z-index: 20;
+        }
+
+        .desk.is-dragging {
+            opacity: 0.8;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            z-index: 50;
+            transform: scale(1.05);
+            border-color: #2563eb;
+        }
+
+        .desk-content {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            pointer-events: none; /* 텍스트가 드래그 방해하지 않도록 */
+        }
+
+        /* 교탁 */
+        .teacher-desk {
+            width: 120px;
+            height: 50px;
+            background-color: #475569;
+            color: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-weight: bold;
+        }
+
+        #classroom-area {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- 헤더 -->
+    <header class="bg-white border-b border-gray-200 py-4 px-6 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fas fa-th"></i>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800">학급 자리 배치</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center bg-gray-100 rounded-lg px-3 py-1.5">
+                    <span class="text-sm text-gray-500 mr-2">학생 수</span>
+                    <input type="number" id="student-count-input" value="24" min="1" max="50" 
+                        class="w-16 bg-transparent border-none text-center font-bold focus:ring-0">
+                    <button onclick="initStudents()" class="ml-2 text-xs bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">
+                        적용
+                    </button>
+                </div>
+                <button onclick="resetDeskLayout()" class="text-sm text-gray-600 hover:text-blue-600 font-medium">
+                    <i class="fas fa-undo mr-1"></i> 책상 초기화
+                </button>
+                <button onclick="assignSeats()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold shadow-md transition-colors active:scale-95">
+                    <i class="fas fa-random mr-2"></i> 자리 배정하기
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 flex gap-6 overflow-hidden h-[calc(100vh-80px)]">
+        
+        <!-- 왼쪽 패널: 학생 명단 -->
+        <aside class="w-64 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-full">
+            <div class="p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                <h2 class="font-bold text-gray-700 flex justify-between items-center">
+                    <span>학생 명단</span>
+                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full" id="student-count-badge">0명</span>
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">이름을 수정할 수 있습니다.</p>
+            </div>
+            
+            <div id="student-list" class="flex-1 overflow-y-auto p-3 custom-scroll space-y-2">
+                <!-- 학생 입력 필드가 여기에 생성됨 -->
+            </div>
+        </aside>
+
+        <!-- 오른쪽 패널: 교실 배치도 -->
+        <section class="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col relative overflow-hidden">
+            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-0">
+                <div class="teacher-desk shadow-md">교탁 (칠판)</div>
+            </div>
+            
+            <div id="classroom-area" class="w-full h-full relative overflow-hidden mt-16">
+                <!-- 책상들이 여기에 생성됨 -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JS 로직 -->
+    <script>
+        // === 데이터 및 상태 ===
+        const lastNames = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임', '한', '오', '서', '신', '권', '황', '안', '송', '류', '전', '홍', '고', '문', '양', '손', '배', '조', '백', '허', '유', '남', '심', '노', '하', '곽', '성', '차', '주', '우', '구', '신', '임', '나', '전', '민'];
+        const firstNames = ['민준', '서준', '도윤', '예준', '시우', '하준', '지호', '지후', '준우', '준서', '서연', '서윤', '지우', '서현', '하은', '하윤', '민서', '지유', '윤서', '채원', '현우', '건우', '도현', '지훈', '우진', '선우', '서진', '연우', '유진', '수아', '다은', '예은', '수빈', '소은', '예진', '지아', '서영', '나은'];
+
+        let students = []; // 학생 이름 배열
+        let deskPositions = []; // 책상 객체 배열
+        const classroomEl = document.getElementById('classroom-area');
+        const studentListEl = document.getElementById('student-list');
+        const countInputEl = document.getElementById('student-count-input');
+
+        // === 랜덤 이름 생성 함수 ===
+        function generateRandomName() {
+            const last = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const first = firstNames[Math.floor(Math.random() * firstNames.length)];
+            return last + first;
+        }
+
+        // === 1. 초기화 및 학생 생성 ===
+        function initStudents() {
+            const count = parseInt(countInputEl.value) || 24;
+            students = [];
+            studentListEl.innerHTML = '';
+            
+            document.getElementById('student-count-badge').textContent = `${count}명`;
+
+            for (let i = 0; i < count; i++) {
+                const name = generateRandomName();
+                students.push(name);
+                
+                // 학생 입력 UI 생성
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2';
+                div.innerHTML = `
+                    <span class="text-xs text-gray-400 w-4 text-right">${i + 1}</span>
+                    <input type="text" value="${name}" data-index="${i}" 
+                        class="flex-1 border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 transition-colors bg-gray-50 focus:bg-white"
+                        onchange="updateStudentName(${i}, this.value)">
+                `;
+                studentListEl.appendChild(div);
+            }
+
+            // 책상 수가 학생 수보다 적으면 책상 초기화
+            // (기본 24개보다 많을 경우를 대비하거나, 학생 수에 맞추려면 이 로직을 수정)
+            // 여기서는 기본 6x4 배치를 유지하되, 필요시 리셋하도록 유도하거나 자동 리셋
+            resetDeskLayout(); 
+        }
+
+        function updateStudentName(index, newName) {
+            students[index] = newName;
+            // 이미 배치된 책상이 있다면 이름 업데이트
+            const deskNameEl = document.getElementById(`desk-name-${index}`);
+            if (deskNameEl) {
+                deskNameEl.textContent = newName;
+            }
+        }
+
+        // === 2. 책상 배치 (기본 6열 4행) ===
+        function resetDeskLayout() {
+            classroomEl.innerHTML = '';
+            const studentCount = students.length;
+            
+            // 기본 배치는 6열 4행 (총 24석). 학생이 더 많으면 행을 늘림
+            const cols = 6;
+            const rows = Math.ceil(Math.max(studentCount, 24) / cols);
+            
+            // 컨테이너 중앙 정렬을 위한 계산
+            const deskWidth = 80;
+            const deskHeight = 60;
+            const gapX = 20;
+            const gapY = 30;
+            
+            const totalWidth = cols * deskWidth + (cols - 1) * gapX;
+            const startX = (classroomEl.clientWidth - totalWidth) / 2;
+            const startY = 40; // 교탁 아래 공간
+
+            for (let i = 0; i < Math.max(studentCount, 24); i++) {
+                const r = Math.floor(i / cols);
+                const c = i % cols;
+                
+                const x = startX + c * (deskWidth + gapX);
+                const y = startY + r * (deskHeight + gapY);
+
+                createDesk(i, x, y);
+            }
+        }
+
+        function createDesk(id, x, y) {
+            const desk = document.createElement('div');
+            desk.className = 'desk';
+            desk.id = `desk-${id}`;
+            desk.style.left = `${x}px`;
+            desk.style.top = `${y}px`;
+            
+            // 드래그 이벤트 연결
+            desk.addEventListener('mousedown', initDrag);
+
+            // 내용
+            const content = document.createElement('div');
+            content.className = 'desk-content';
+            content.innerHTML = `<span id="desk-name-display-${id}" class="text-gray-400 text-xs">빈 자리</span>`;
+            
+            desk.appendChild(content);
+            classroomEl.appendChild(desk);
+        }
+
+        // === 3. 드래그 앤 드롭 로직 ===
+        let activeDesk = null;
+        let initialX = 0;
+        let initialY = 0;
+        let currentX = 0;
+        let currentY = 0;
+
+        function initDrag(e) {
+            // 왼쪽 버튼만 허용
+            if (e.button !== 0) return;
+
+            activeDesk = e.target.closest('.desk');
+            if (!activeDesk) return;
+
+            activeDesk.classList.add('is-dragging');
+
+            initialX = e.clientX - activeDesk.offsetLeft;
+            initialY = e.clientY - activeDesk.offsetTop;
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function drag(e) {
+            if (!activeDesk) return;
+            e.preventDefault();
+
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            // 경계 제한 (옵션)
+            // const rect = classroomEl.getBoundingClientRect();
+            // currentX = Math.max(0, Math.min(currentX, rect.width - 80));
+            // currentY = Math.max(0, Math.min(currentY, rect.height - 60));
+
+            activeDesk.style.left = `${currentX}px`;
+            activeDesk.style.top = `${currentY}px`;
+        }
+
+        function stopDrag() {
+            if (activeDesk) {
+                activeDesk.classList.remove('is-dragging');
+                activeDesk = null;
+            }
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        // === 4. 자리 배정 알고리즘 ===
+        function assignSeats() {
+            // 학생 명단 복사 후 셔플 (Fisher-Yates Shuffle)
+            const shuffled = [...students];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            // 모든 책상 요소 가져오기
+            const desks = document.querySelectorAll('.desk');
+            
+            desks.forEach((desk, index) => {
+                const displayEl = desk.querySelector('.desk-content span');
+                
+                // 애니메이션 효과
+                displayEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    if (index < shuffled.length) {
+                        displayEl.textContent = shuffled[index];
+                        displayEl.className = "text-gray-800 font-bold";
+                        desk.style.backgroundColor = "#eff6ff"; // 할당된 자리 색상
+                        desk.style.borderColor = "#bfdbfe";
+                    } else {
+                        displayEl.textContent = "빈 자리";
+                        displayEl.className = "text-gray-300 text-xs";
+                        desk.style.backgroundColor = "#fff";
+                        desk.style.borderColor = "#e2e8f0";
+                    }
+                    displayEl.style.opacity = '1';
+                }, 150 + (index * 20)); // 순차적으로 나타나는 효과
+            });
+        }
+
+        // === 초기 실행 ===
+        window.onload = () => {
+            initStudents();
+            
+            // 윈도우 리사이즈 시 책상 재배치 (선택사항, 현재는 위치 고정을 위해 주석처리 하거나 필요한 경우 활성화)
+            // window.addEventListener('resize', resetDeskLayout);
+        };
+
+    </script>
+</body>
+</html>
