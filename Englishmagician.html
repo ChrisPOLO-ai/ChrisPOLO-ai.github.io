@@ -460,7 +460,7 @@
     <div class="game-container">
         <div class="header">
             <h1>✨ 영어 마법사 게임 ✨</h1>
-            <p class="subtitle">AI가 만들어주는 마법의 예문으로 영어를 배워요!</p>
+            <p class="subtitle">재미있는 예문으로 영어를 배워요!</p>
         </div>
 
         <div class="stats-container">
@@ -551,6 +551,90 @@
         let totalTyped = 0;
         let correctTyped = 0;
 
+        // 단어 데이터베이스 (초등학생 수준)
+        const wordDatabase = {
+            // 동물
+            cat: { meaning: "고양이", examples: ["I have a cute cat.", "The cat is sleeping.", "My cat loves fish."] },
+            dog: { meaning: "강아지", examples: ["Dogs are loyal friends.", "My dog likes to play.", "The dog is running fast."] },
+            bird: { meaning: "새", examples: ["Birds can fly high.", "I see a colorful bird.", "The bird is singing."] },
+            fish: { meaning: "물고기", examples: ["Fish live in water.", "I caught a big fish.", "The fish is swimming."] },
+            rabbit: { meaning: "토끼", examples: ["Rabbits have long ears.", "The rabbit is hopping.", "I fed the rabbit."] },
+            
+            // 과일
+            apple: { meaning: "사과", examples: ["I eat an apple daily.", "This apple is very sweet.", "Apples are healthy fruits."] },
+            banana: { meaning: "바나나", examples: ["Monkeys love bananas.", "I ate a yellow banana.", "Bananas are soft fruits."] },
+            orange: { meaning: "오렌지", examples: ["Oranges have vitamin C.", "I drink orange juice.", "This orange is juicy."] },
+            grape: { meaning: "포도", examples: ["Grapes grow on vines.", "I like purple grapes.", "These grapes are sweet."] },
+            
+            // 감정
+            happy: { meaning: "행복한", examples: ["I am happy today.", "She looks very happy.", "Happy children are playing."] },
+            sad: { meaning: "슬픈", examples: ["Why are you sad?", "The sad movie ended.", "Don't be sad anymore."] },
+            angry: { meaning: "화난", examples: ["He is angry now.", "Don't make me angry.", "The angry teacher shouted."] },
+            excited: { meaning: "신나는", examples: ["I am excited today!", "Kids are excited.", "We feel so excited."] },
+            
+            // 동작
+            run: { meaning: "달리다", examples: ["I can run fast.", "Let's run together!", "Dogs love to run."] },
+            jump: { meaning: "점프하다", examples: ["I can jump high.", "Frogs jump well.", "Let's jump together!"] },
+            walk: { meaning: "걷다", examples: ["I walk to school.", "Let's walk slowly.", "She walks every day."] },
+            play: { meaning: "놀다", examples: ["I play with friends.", "Kids play outside.", "Let's play games!"] },
+            eat: { meaning: "먹다", examples: ["I eat breakfast daily.", "Let's eat together.", "She eats vegetables."] },
+            drink: { meaning: "마시다", examples: ["I drink water.", "Please drink milk.", "We drink juice."] },
+            sleep: { meaning: "자다", examples: ["I sleep at night.", "Babies sleep a lot.", "Let's go to sleep."] },
+            
+            // 색깔
+            red: { meaning: "빨간색", examples: ["I see a red car.", "Apples are red.", "She wears red shoes."] },
+            blue: { meaning: "파란색", examples: ["The sky is blue.", "I like blue color.", "He has blue eyes."] },
+            green: { meaning: "초록색", examples: ["Grass is green.", "I see green trees.", "Frogs are green."] },
+            yellow: { meaning: "노란색", examples: ["The sun is yellow.", "I have yellow flowers.", "Bananas are yellow."] },
+            
+            // 가족
+            mom: { meaning: "엄마", examples: ["I love my mom.", "Mom cooks dinner.", "My mom is kind."] },
+            dad: { meaning: "아빠", examples: ["Dad goes to work.", "I help my dad.", "My dad is strong."] },
+            brother: { meaning: "형, 오빠, 남동생", examples: ["My brother is tall.", "I play with brother.", "Brother helps me study."] },
+            sister: { meaning: "언니, 누나, 여동생", examples: ["My sister is pretty.", "Sister reads books.", "I love my sister."] },
+            
+            // 학교
+            school: { meaning: "학교", examples: ["I go to school.", "School is fun today.", "We study at school."] },
+            teacher: { meaning: "선생님", examples: ["My teacher is nice.", "The teacher helps us.", "I like my teacher."] },
+            book: { meaning: "책", examples: ["I read a book.", "Books are interesting.", "This book is new."] },
+            pencil: { meaning: "연필", examples: ["I write with pencil.", "My pencil is sharp.", "Please lend me pencil."] },
+            
+            // 자연
+            sun: { meaning: "태양", examples: ["The sun is bright.", "I love sunny days.", "Sun gives us light."] },
+            moon: { meaning: "달", examples: ["The moon is beautiful.", "I see the moon.", "Moon shines at night."] },
+            star: { meaning: "별", examples: ["Stars twinkle brightly.", "I see many stars.", "That star is bright."] },
+            tree: { meaning: "나무", examples: ["Trees are very tall.", "I climb the tree.", "Birds sit on trees."] },
+            flower: { meaning: "꽃", examples: ["Flowers are pretty.", "I smell the flower.", "Spring brings flowers."] },
+            
+            // 집
+            home: { meaning: "집", examples: ["I go home now.", "Home is comfortable.", "Welcome to my home."] },
+            room: { meaning: "방", examples: ["My room is clean.", "I study in room.", "This room is big."] },
+            bed: { meaning: "침대", examples: ["I sleep on bed.", "My bed is soft.", "Make your bed daily."] },
+            
+            // 음식
+            pizza: { meaning: "피자", examples: ["I love eating pizza.", "Pizza is delicious.", "Let's order pizza tonight."] },
+            cake: { meaning: "케이크", examples: ["Birthday cake is sweet.", "I ate chocolate cake.", "Mom baked a cake."] },
+            bread: { meaning: "빵", examples: ["I eat bread daily.", "This bread is fresh.", "Toast the bread please."] },
+            
+            // 날씨
+            rain: { meaning: "비", examples: ["It will rain today.", "I hear the rain.", "Rain makes plants grow."] },
+            snow: { meaning: "눈", examples: ["I love playing snow.", "Snow is white.", "It snows in winter."] },
+            
+            // 숫자 관련
+            big: { meaning: "큰", examples: ["That elephant is big.", "I want big pizza.", "This is too big."] },
+            small: { meaning: "작은", examples: ["The ant is small.", "I have small hands.", "This room is small."] },
+            
+            // 기타
+            friend: { meaning: "친구", examples: ["She is my friend.", "Friends play together.", "I help my friends."] },
+            love: { meaning: "사랑하다", examples: ["I love my family.", "We love ice cream.", "Love makes us happy."] },
+            like: { meaning: "좋아하다", examples: ["I like chocolate.", "Do you like music?", "Kids like toys."] },
+            want: { meaning: "원하다", examples: ["I want new shoes.", "What do you want?", "She wants ice cream."] },
+            have: { meaning: "가지다", examples: ["I have two cats.", "Do you have time?", "We have a garden."] },
+            make: { meaning: "만들다", examples: ["I make a sandwich.", "Let's make cookies.", "Mom makes dinner."] },
+            see: { meaning: "보다", examples: ["I see a rainbow.", "Can you see that?", "We see many stars."] },
+            hear: { meaning: "듣다", examples: ["I hear birds singing.", "Can you hear me?", "We hear the music."] }
+        };
+
         function createStars() {
             const starsContainer = document.getElementById('stars');
             for (let i = 0; i < 50; i++) {
@@ -563,9 +647,9 @@
             }
         }
 
-        async function generateExample() {
+        function generateExample() {
             const wordInput = document.getElementById('wordInput');
-            const word = wordInput.value.trim();
+            const word = wordInput.value.trim().toLowerCase();
 
             if (!word) {
                 alert('단어를 입력해주세요! 😊');
@@ -577,49 +661,29 @@
             const generateBtn = document.getElementById('generateBtn');
 
             generateBtn.disabled = true;
-            exampleArea.innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top: 15px; color: #667eea; font-size: 1.2em;">AI가 마법의 예문을 만들고 있어요... ✨</p></div>';
+            exampleArea.innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top: 15px; color: #667eea; font-size: 1.2em;">마법의 예문을 만들고 있어요... ✨</p></div>';
 
-            try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: `For the English word "${word}", provide:
-1. Korean meaning (초등학생이 이해하기 쉬운 한국어 뜻, 간단하게)
-2. A simple, fun English sentence using this word (5-10 words, appropriate for ages 7-12)
-
-Respond ONLY in this exact JSON format with no additional text or markdown:
-{"meaning": "한국어 뜻", "sentence": "English example sentence"}`
-                            }
-                        ]
-                    })
-                });
-
-                const data = await response.json();
-                const responseText = data.content[0].text.trim();
-                const cleanText = responseText.replace(/```json|```/g, '').trim();
-                const result = JSON.parse(cleanText);
-                
-                currentExample = result.sentence;
-
-                showExample(word, result.meaning, result.sentence);
-                wordsLearned++;
-                totalWords++;
-                updateStats();
-
-            } catch (error) {
-                exampleArea.innerHTML = '<p style="color: #dc3545; text-align: center;">예문을 만드는데 문제가 생겼어요. 다시 시도해주세요! 😅</p>';
-                console.error('Error:', error);
-            } finally {
+            setTimeout(() => {
+                if (wordDatabase[word]) {
+                    const wordData = wordDatabase[word];
+                    const randomExample = wordData.examples[Math.floor(Math.random() * wordData.examples.length)];
+                    currentExample = randomExample;
+                    showExample(word, wordData.meaning, randomExample);
+                    wordsLearned++;
+                    totalWords++;
+                    updateStats();
+                } else {
+                    // 데이터베이스에 없는 단어는 간단한 예문 생성
+                    const meaning = "단어 뜻 확인 필요";
+                    const simpleExample = `I like ${word}.`;
+                    currentExample = simpleExample;
+                    showExample(word, meaning, simpleExample);
+                    wordsLearned++;
+                    totalWords++;
+                    updateStats();
+                }
                 generateBtn.disabled = false;
-            }
+            }, 800);
         }
 
         function showExample(word, meaning, sentence) {
@@ -631,7 +695,7 @@ Respond ONLY in this exact JSON format with no additional text or markdown:
                     <div class="meaning-display">💡 뜻: ${meaning}</div>
                 </div>
                 <div class="example-header">
-                    <div class="example-title">✨ AI가 만든 예문</div>
+                    <div class="example-title">✨ 예문</div>
                     <button class="speaker-btn" onclick="speakExample()" id="speakBtn">
                         🔊 발음 듣기
                     </button>
@@ -653,6 +717,7 @@ Respond ONLY in this exact JSON format with no additional text or markdown:
 
         function speakExample() {
             if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(currentExample);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.8;
