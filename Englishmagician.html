@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영어 마법사 게임</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #ff7675 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: slideDown 0.5s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .main-area {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            color: white;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .word-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .word-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 3px solid white;
+            border-radius: 15px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+        }
+
+        .word-input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(255,255,255,0.5);
+        }
+
+        .generate-btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255,255,255,0.5);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .example-area {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            min-height: 150px;
+        }
+
+        .word-meaning-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            color: white;
+        }
+
+        .word-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .word-display {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .meaning-display {
+            font-size: 1.4em;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .example-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .example-title {
+            font-size: 1.3em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .speaker-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+        }
+
+        .speaker-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .speaker-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .example-text {
+            font-size: 1.5em;
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .typing-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .typing-label {
+            font-size: 1.2em;
+            color: #856404;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3em;
+            border: 3px solid #ffc107;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+        }
+
+        .typing-input:focus {
+            border-color: #ff9800;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .check-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+        }
+
+        .check-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .check-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .leaderboard {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .leaderboard h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 800;
+        }
+
+        .rank-item {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .badge-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+
+        .badge-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .badge-popup h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .badge-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .next-word-btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+        }
+
+        .next-word-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .accuracy-bar {
+            margin-top: 10px;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="game-container">
+        <div class="header">
+            <h1>✨ 영어 마법사 게임 ✨</h1>
+            <p class="subtitle">AI가 만들어주는 마법의 예문으로 영어를 배워요!</p>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">점수</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-label">연속</div>
+                <div class="stat-value" id="streak">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-label">배운 단어</div>
+                <div class="stat-value" id="wordsLearned">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-label">배지</div>
+                <div class="stat-value" id="badges">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-label">정확도</div>
+                <div class="stat-value" id="accuracy">0%</div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="input-section">
+                <label class="input-label">🎨 배우고 싶은 영어 단어를 입력하세요!</label>
+                <div class="word-input-container">
+                    <input 
+                        type="text" 
+                        class="word-input" 
+                        id="wordInput" 
+                        placeholder="예: apple, happy, run..."
+                        onkeypress="if(event.key === 'Enter') generateExample()"
+                    >
+                    <button class="generate-btn" onclick="generateExample()" id="generateBtn">
+                        🪄 마법 시작!
+                    </button>
+                </div>
+            </div>
+
+            <div class="example-area" id="exampleArea">
+                <p style="text-align: center; color: #999; font-size: 1.2em;">
+                    위에 영어 단어를 입력하고 마법을 시작해보세요! 🌟
+                </p>
+            </div>
+
+            <button class="next-word-btn" onclick="nextWord()" id="nextBtn" style="display: none;">
+                다음 단어 배우기 →
+            </button>
+        </div>
+
+        <div class="leaderboard">
+            <h2>🏆 오늘의 기록</h2>
+            <div class="rank-item">
+                <span>🥇 최고 점수</span>
+                <span id="highScore" style="font-weight: bold; color: #667eea;">0점</span>
+            </div>
+            <div class="rank-item">
+                <span>📖 총 배운 단어</span>
+                <span id="totalWords" style="font-weight: bold; color: #667eea;">0개</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="badge-popup" id="badgePopup">
+        <div class="badge-icon" id="badgeIcon"></div>
+        <h2 id="badgeTitle"></h2>
+        <p id="badgeText" style="font-size: 1.2em; color: #666;"></p>
+        <button class="next-word-btn" onclick="closeBadge()">계속하기!</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let streak = 0;
+        let wordsLearned = 0;
+        let badges = 0;
+        let highScore = 0;
+        let totalWords = 0;
+        let currentWord = '';
+        let currentExample = '';
+        let totalTyped = 0;
+        let correctTyped = 0;
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        async function generateExample() {
+            const wordInput = document.getElementById('wordInput');
+            const word = wordInput.value.trim();
+
+            if (!word) {
+                alert('단어를 입력해주세요! 😊');
+                return;
+            }
+
+            currentWord = word;
+            const exampleArea = document.getElementById('exampleArea');
+            const generateBtn = document.getElementById('generateBtn');
+
+            generateBtn.disabled = true;
+            exampleArea.innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top: 15px; color: #667eea; font-size: 1.2em;">AI가 마법의 예문을 만들고 있어요... ✨</p></div>';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: `For the English word "${word}", provide:
+1. Korean meaning (초등학생이 이해하기 쉬운 한국어 뜻, 간단하게)
+2. A simple, fun English sentence using this word (5-10 words, appropriate for ages 7-12)
+
+Respond ONLY in this exact JSON format with no additional text or markdown:
+{"meaning": "한국어 뜻", "sentence": "English example sentence"}`
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const responseText = data.content[0].text.trim();
+                const cleanText = responseText.replace(/```json|```/g, '').trim();
+                const result = JSON.parse(cleanText);
+                
+                currentExample = result.sentence;
+
+                showExample(word, result.meaning, result.sentence);
+                wordsLearned++;
+                totalWords++;
+                updateStats();
+
+            } catch (error) {
+                exampleArea.innerHTML = '<p style="color: #dc3545; text-align: center;">예문을 만드는데 문제가 생겼어요. 다시 시도해주세요! 😅</p>';
+                console.error('Error:', error);
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+
+        function showExample(word, meaning, sentence) {
+            const exampleArea = document.getElementById('exampleArea');
+            exampleArea.innerHTML = `
+                <div class="word-meaning-box">
+                    <div class="word-label">📖 단어</div>
+                    <div class="word-display">${word}</div>
+                    <div class="meaning-display">💡 뜻: ${meaning}</div>
+                </div>
+                <div class="example-header">
+                    <div class="example-title">✨ AI가 만든 예문</div>
+                    <button class="speaker-btn" onclick="speakExample()" id="speakBtn">
+                        🔊 발음 듣기
+                    </button>
+                </div>
+                <div class="example-text">${sentence}</div>
+                <div class="typing-section">
+                    <div class="typing-label">✍️ 예문을 따라 적어보세요!</div>
+                    <input 
+                        type="text" 
+                        class="typing-input" 
+                        id="typingInput" 
+                        placeholder="여기에 입력하세요..."
+                    >
+                    <button class="check-btn" onclick="checkTyping()">확인하기</button>
+                    <div id="typingFeedback"></div>
+                </div>
+            `;
+        }
+
+        function speakExample() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(currentExample);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('이 브라우저는 음성 기능을 지원하지 않아요 😢');
+            }
+        }
+
+        function checkTyping() {
+            const typingInput = document.getElementById('typingInput');
+            const userInput = typingInput.value.trim();
+            const feedback = document.getElementById('typingFeedback');
+
+            if (!userInput) {
+                alert('먼저 예문을 입력해주세요! ✍️');
+                return;
+            }
+
+            totalTyped++;
+
+            const similarity = calculateSimilarity(userInput.toLowerCase(), currentExample.toLowerCase());
+            const accuracyPercent = Math.round(similarity * 100);
+
+            if (accuracyPercent >= 90) {
+                correctTyped++;
+                streak++;
+                score += 100;
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    🎉 완벽해요! +100점<br>
+                    정확도: ${accuracyPercent}%
+                    <div class="accuracy-bar">
+                        <div class="accuracy-fill" style="width: ${accuracyPercent}%"></div>
+                    </div>
+                `;
+
+                if (streak % 3 === 0) {
+                    badges++;
+                    showBadge();
+                }
+            } else if (accuracyPercent >= 70) {
+                correctTyped++;
+                score += 50;
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    😊 좋아요! +50점<br>
+                    정확도: ${accuracyPercent}%<br>
+                    <small>정답: ${currentExample}</small>
+                    <div class="accuracy-bar">
+                        <div class="accuracy-fill" style="width: ${accuracyPercent}%"></div>
+                    </div>
+                `;
+            } else {
+                streak = 0;
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    🤔 다시 한번 확인해볼까요?<br>
+                    정확도: ${accuracyPercent}%<br>
+                    정답: ${currentExample}
+                    <div class="accuracy-bar">
+                        <div class="accuracy-fill" style="width: ${accuracyPercent}%"></div>
+                    </div>
+                `;
+            }
+
+            typingInput.disabled = true;
+            document.getElementById('nextBtn').style.display = 'block';
+            updateStats();
+        }
+
+        function calculateSimilarity(str1, str2) {
+            const longer = str1.length > str2.length ? str1 : str2;
+            const shorter = str1.length > str2.length ? str2 : str1;
+            
+            if (longer.length === 0) return 1.0;
+            
+            const editDistance = levenshteinDistance(longer, shorter);
+            return (longer.length - editDistance) / longer.length;
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+
+            return matrix[str2.length][str1.length];
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('wordsLearned').textContent = wordsLearned;
+            document.getElementById('badges').textContent = badges;
+            
+            const accuracyPercent = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracyPercent + '%';
+
+            if (score > highScore) {
+                highScore = score;
+                document.getElementById('highScore').textContent = highScore + '점';
+            }
+
+            document.getElementById('totalWords').textContent = totalWords + '개';
+        }
+
+        function showBadge() {
+            const popup = document.getElementById('badgePopup');
+            const badges_list = ['🌟', '⭐', '✨', '🎖️', '🏅', '🎯'];
+            const titles = ['대단해요!', '멋져요!', '최고예요!', '천재예요!', '완벽해요!'];
+            
+            document.getElementById('badgeIcon').textContent = badges_list[badges % badges_list.length];
+            document.getElementById('badgeTitle').textContent = titles[Math.floor(Math.random() * titles.length)];
+            document.getElementById('badgeText').textContent = `연속 ${streak}개 정답! 배지 획득! 🎉`;
+            
+            popup.classList.add('show');
+            
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 2500);
+        }
+
+        function closeBadge() {
+            document.getElementById('badgePopup').classList.remove('show');
+        }
+
+        function nextWord() {
+            document.getElementById('wordInput').value = '';
+            document.getElementById('exampleArea').innerHTML = '<p style="text-align: center; color: #999; font-size: 1.2em;">다음 단어를 입력하고 마법을 시작해보세요! 🌟</p>';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('wordInput').focus();
+        }
+
+        createStars();
+        updateStats();
+    </script>
+</body>
+</html>
